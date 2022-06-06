@@ -9,8 +9,12 @@ Various approaches to find a text in a corpus
     - add the text instance ID to the work .yml
 
 
-## Interested Links
+## Interesting Links
+### Fuzzy search
 - https://pypi.org/project/fuzzysearch/
+- https://github.com/seatgeek/thefuzz
+
+### Full text search
 - https://towardsdatascience.com/natural-language-processing-document-search-using-spacy-and-python-820acdf604af
 - https://freecontent.manning.com/the-cool-way-to-search-text/
 - https://github.com/rtmigo/skifts_py
