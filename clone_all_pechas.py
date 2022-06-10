@@ -1,5 +1,6 @@
 import csv
 import re
+import requests
 from pathlib import Path
 from git import Repo
 
@@ -24,11 +25,22 @@ def download_pecha(pecha_id, out_path=None, branch="master"):
     repo.git.checkout(branch_to_pull)
     print(f"{pecha_id} Downloaded ")  
 
+def get_repo_names(headers):
+    all_repo_names = []
+    for page_num in range(1,200):
+        response = requests.get(f"https://api.github.com/orgs/Openpecha/repos?page={page_num}&per_page=100", headers=headers)
+        data = response.json()
+        for info in data:
+            if type(info) is dict:
+                repo_name = info["name"]
+                all_repo_names.append(repo_name)
+    return all_repo_names
 
 if __name__ == "__main__":
-    output_path = Path(f"./all-openpecha-pechas/")
-    with open("catalog.csv", newline="") as csvfile:
-        pechas = list(csv.reader(csvfile, delimiter=","))
-        for pecha in pechas[0:]:
-            pecha_id = re.search("\[.+\]", pecha[0])[0][1:-1]
-            download_pecha(pecha_id, output_path)
+    # headers = {"Authorization": f"bearer {token}"}
+    # pecha_ids = ""
+    # repo_names = get_repo_names(headers)
+    repo_names = (Path(f"./repo_names.txt").read_text(encoding='8')).splitlines()
+    for repo_name in repo_names:
+        output_path = Path(f"./all-openpecha-repos/")
+        download_pecha(repo_name, output_path)
