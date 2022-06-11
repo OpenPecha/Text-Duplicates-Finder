@@ -1,17 +1,30 @@
 import csv
+from lib2to3.pgen2 import token
 import re
 import requests
 from pathlib import Path
 from git import Repo
+import logging
+
+
+github_token = Path('github_token').read_text()
 
 config = {
-    "OP_ORG": "https://github.com/Openpecha"
+    "OP_ORG": f"https://{github_token}:x-oauth-basic@github.com/Openpecha"
 }
 
+logging.basicConfig(
+    filename="error_repos.log",
+    format="%(levelname)s: %(message)s",
+    level=logging.INFO
+)
+
+def notifier(msg):
+    logging.info(msg)
 def get_branch(repo, branch):
     if branch in repo.heads:
         return branch
-    return "master"
+    return "main"
 
 
 def download_pecha(pecha_id, out_path=None, branch="master"):
@@ -22,7 +35,10 @@ def download_pecha(pecha_id, out_path=None, branch="master"):
     Repo.clone_from(pecha_url, str(pecha_path))
     repo = Repo(str(pecha_path))
     branch_to_pull = get_branch(repo, branch)
-    repo.git.checkout(branch_to_pull)
+    try:
+        repo.git.checkout(branch_to_pull)
+    except:
+        notifier(f"{pecha_id} has problem")
     print(f"{pecha_id} Downloaded ")  
 
 def get_repo_names(headers):
@@ -40,7 +56,8 @@ if __name__ == "__main__":
     # headers = {"Authorization": f"bearer {token}"}
     # pecha_ids = ""
     # repo_names = get_repo_names(headers)
-    repo_names = (Path(f"./repo_names.txt").read_text(encoding='8')).splitlines()
-    for repo_name in repo_names:
-        output_path = Path(f"./all-openpecha-repos/")
-        download_pecha(repo_name, output_path)
+    output_path = Path(f"/mnt/d/")
+    repo_names = (Path(f"./repo_names.txt").read_text(encoding='utf-8')).splitlines()
+    for num, repo_name in enumerate(repo_names, 1):
+        if num > 7982:
+            download_pecha(repo_name, output_path)
