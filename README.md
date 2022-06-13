@@ -19,17 +19,13 @@
 
 ## Description
 
-- dowload all opfs in the OpenPecha archive
-- generate a corpus with views of all normalized views
-- fuzzy search several small substrings from start, middle and end of text
-    - if match is found check the length between start and end (versions might get up to 150% or original because of notes or page headers, commentaries can get 200% or more)
-    - add table of content layer with the coordinate of the text
-    - add the text instance ID to the work .yml
+- normalise all the punctuations of the pedurma pechas, with using tengyur from BDRC
 
 <!-- This section provides a high-level overview for the repo -->
 
 ## Owner
 
+-[@Topjor](https://github.com/jungtop)
 - [@ngawangtrinley](https://github.com/ngawangtrinley)
 - [@ta4tsering](https://github.com/ta4tsering)
 
