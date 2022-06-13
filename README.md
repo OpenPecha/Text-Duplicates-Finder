@@ -25,7 +25,7 @@
 
 ## Owner
 
--[@Topjor](https://github.com/jungtop)
+- [@Topjor](https://github.com/jungtop)
 - [@ngawangtrinley](https://github.com/ngawangtrinley)
 - [@ta4tsering](https://github.com/ta4tsering)
 
