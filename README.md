@@ -20,6 +20,7 @@
 ## Description
 
 - normalise all the punctuations of the pedurma pechas, with using tengyur from BDRC
+- Searches for a target sequence in corpus
 
 <!-- This section provides a high-level overview for the repo -->
 
