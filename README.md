@@ -4,7 +4,7 @@
   <br>
 </h1>
 
-<h3 align="center">Text-searcher</h3>
+<h3 align="center">text-searcher</h3>
 
 
 <!-- Replace the title of the repository -->
@@ -25,7 +25,7 @@
 
 ## Owner
 
-- [@Topjor](https://github.com/jungtop)
+- [@topjor](https://github.com/jungtop)
 - [@ngawangtrinley](https://github.com/ngawangtrinley)
 - [@ta4tsering](https://github.com/ta4tsering)
 
