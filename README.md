@@ -4,7 +4,7 @@
   <br>
 </h1>
 
-<h3 align="center">Text-searcher</h3>
+<h3 align="center">text-searcher</h3>
 
 
 <!-- Replace the title of the repository -->
@@ -20,12 +20,13 @@
 ## Description
 
 - normalise all the punctuations of the pedurma pechas, with using tengyur from BDRC
+- Searches for a target sequence in corpus
 
 <!-- This section provides a high-level overview for the repo -->
 
 ## Owner
 
-- [@Topjor](https://github.com/jungtop)
+- [@topjor](https://github.com/jungtop)
 - [@ngawangtrinley](https://github.com/ngawangtrinley)
 - [@ta4tsering](https://github.com/ta4tsering)
 
