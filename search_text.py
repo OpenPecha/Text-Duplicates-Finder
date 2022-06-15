@@ -45,34 +45,37 @@ class OpfSearchSequence:
         return match
 
 
-    def create_index(self,span,target_file):
-        annotations = self.get_annotations(span,target_file)
+    def create_index(self,spans,target_file):
+        annotations = self.get_annotations(spans,target_file)
         Path(f"{self.target_path}/index.yml").write_text(annotations)
-        instance = self.get_instance(span,target_file)
-        return instance
+        instances = self.get_instances(spans,target_file)
+        return instances
 
-    def get_annotations(self,span,target_file):
+    def get_annotations(self,spans,target_file):
+        page_annotaions = {}
 
-        start,end = span
-        span = {
-            "start":start,
-            "end":end
-        }
-        page_annotaion = {uuid4().hex:{
-            "work":self.work,
-            "work_id":self.get_work_id(),
-            "base":target_file.stem,
-            "span":span
-        }
-        }
+        for span in spans:
+            start,end = span
+            span = {
+                "start":start,
+                "end":end
+            }
+            page_annotaion = {uuid4().hex:{
+                "work":self.work,
+                "work_id":self.get_work_id(),
+                "base":target_file.stem,
+                "span":span
+            }
+            }
+            page_annotaions.update(page_annotaion)
         if exists(f"{self.target_path}/index.yml"):
             index = self.from_yaml(Path(f"{self.target_path}/index.yml"))
-            index["annotations"].update(page_annotaion)
+            index["annotations"].update(page_annotaions)
         else:
             index = {
             "id":uuid4().hex,
             "annotatation_type":"index",
-            "annotations":page_annotaion
+            "annotations":page_annotaions
             }
 
         index_yml = self.toyaml(index)
@@ -80,9 +83,12 @@ class OpfSearchSequence:
         return index_yml
 
 
-    def get_matched_span(self,match):
-        first_match,last_match = match
-        return (first_match.start,last_match.end)
+    def get_matched_spans(self,matches):
+        match_list = []
+        for match in matches:
+            first_match,last_match = match
+            match_list.append((first_match.start,last_match.end))
+        return match_list
 
     
     @staticmethod
@@ -97,19 +103,22 @@ class OpfSearchSequence:
     def get_work_id():
         return "W" + "".join(random.choices(uuid4().hex, k=8)).upper()
 
-    def get_instance(self,span,target_file):
-        start,end = span
-        instance = {
-            uuid4().hex:{
-                "pecha_id":Path(self.target_path).stem,
-                "span":{
-                    "base":target_file.stem,
-                    "start":start,
-                    "end":end
+    def get_instances(self,spans,target_file):
+        instances = {}
+        for span in spans:
+            start,end = span
+            instance = {
+                uuid4().hex:{
+                    "pecha_id":Path(self.target_path).stem,
+                    "span":{
+                        "base":target_file.stem,
+                        "start":start,
+                        "end":end
+                    }
                 }
             }
-        }
-        return instance
+            instances.update(instance)
+        return instances
 
     def filter_matches(self,first_match,mid_match,last_match):
         matches = []
@@ -124,13 +133,13 @@ class OpfSearchSequence:
         lengths =[len(first_match),len(mid_match),len(last_match)]
         minimum = min(lengths)
         if lengths.count(minimum) == 1:
-            match = self.get_one_minimum(minimum,first_match,mid_match,last_match)
+            matches = self.get_one_minimum(minimum,first_match,mid_match,last_match)
         elif lengths.count(minimum) == 2:
-            match = self.get_two_minimum(minimum,first_match,mid_match,last_match)
+            matches = self.get_two_minimum(minimum,first_match,mid_match,last_match)
         else:
-            match =self.get_three_minimum(minimum,first_match,mid_match,last_match)
+            matches =self.get_three_minimum(minimum,first_match,mid_match,last_match)
 
-        return match         
+        return matches        
 
     def get_closest_match(self,match_target,match_collection,diffs):
         ref_span = match_target[0].start
@@ -190,8 +199,8 @@ class OpfSearchSequence:
             if matches:
                 print(f"MATCH at {target_file}")
                 print(matches)
-                span = self.get_matched_span(matches)
-                instance = self.create_index(span,target_file)
+                spans = self.get_matched_spans(matches)
+                instance = self.create_index(spans,target_file)
                 instances.update(instance)
         
         return instances
@@ -227,4 +236,3 @@ if __name__ == "__main__":
     works_yml = update_works(instances,work)
     Path("./works.yml").write_text(works_yml)
 
-#module to handle if there is more than one match in first,mid,last
