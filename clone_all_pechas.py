@@ -1,3 +1,4 @@
+from cmath import e
 import csv
 from lib2to3.pgen2 import token
 import re
@@ -5,12 +6,13 @@ import requests
 from pathlib import Path
 from git import Repo
 import logging
+import os
 
 
-github_token = Path('github_token').read_text()
+github_token = os.environ.get("GITHUB_TOKEN")
 
 config = {
-    "OP_ORG": f"https://{github_token}:x-oauth-basic@github.com/Openpecha"
+    "OP_ORG": f"https://{github_token}:x-oauth-basic@github.com/OpenPecha-Data"
 }
 
 logging.basicConfig(
@@ -26,6 +28,15 @@ def get_branch(repo, branch):
         return branch
     return "main"
 
+def git_push(PATH_OF_GIT_REPO,COMMIT_MESSAGE,files):
+    try:
+        repo = Repo(PATH_OF_GIT_REPO)
+        repo.git.add(files)
+        repo.index.commit(COMMIT_MESSAGE)
+        origin = repo.remote(name='origin')
+        origin.push()
+    except Exception as e:
+        print(e) 
 
 def download_pecha(pecha_id, out_path=None, branch="master"):
     pecha_url = f"{config['OP_ORG']}/{pecha_id}.git"
