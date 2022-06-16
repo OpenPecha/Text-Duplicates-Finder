@@ -30,11 +30,11 @@ def get_instances(search_path,target_opf_path,work):
 
 def get_pecha_ids():
     pecha_ids = (Path(f"./repo_names.txt").read_text(encoding='utf-8')).splitlines()
-    if not exists("./processed_files.log"):
+    if not exists("./processed_pechas.log"):
         for pecha_id in pecha_ids:
             yield pecha_id
     else:        
-        processed_pecha_ids = (Path(f"./processed_files.log").read_text(encoding='utf-8')).splitlines()
+        processed_pecha_ids = (Path(f"./processed_pechas.log").read_text(encoding='utf-8')).splitlines()
         for index,pecha_id in enumerate(pecha_ids):
             last_processed_id = processed_pecha_ids[-1]
             if last_processed_id in pecha_ids[:index]:
@@ -62,12 +62,12 @@ def main():
         print(pecha_id)
         download_pecha(pecha_id,"./opfs")
         target_opf_path = f"./opfs/{pecha_id}"
-        """ instances = get_instances(search_path,target_opf_path,work)
+        instances = get_instances(search_path,target_opf_path,work)
         if instances:
             works_yml = update_works(instances,work)
             Path("./works.yml").write_text(works_yml)
             print(f"Instnace Match at {pecha_id}")
-            #push_changes(target_opf_path) """
+            #push_changes(target_opf_path)
         delete_processed_files(target_opf_path)
         logger.info(pecha_id)
 
