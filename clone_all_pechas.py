@@ -15,14 +15,20 @@ config = {
     "OP_ORG": f"https://{github_token}:x-oauth-basic@github.com/OpenPecha-Data"
 }
 
-logging.basicConfig(
-    filename="error_repos.log",
-    format="%(levelname)s: %(message)s",
-    level=logging.INFO
-)
+formatter = logging.Formatter('%(message)s')
 
-def notifier(msg):
-    logging.info(msg)
+def setup_logger(name, log_file, level=logging.INFO):
+    """To setup as many loggers as you want"""
+    handler = logging.FileHandler(log_file)        
+    handler.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+    return logger
+
+def notifier(logger,msg):
+    logger.info(msg)
 def get_branch(repo, branch):
     if branch in repo.heads:
         return branch
@@ -39,6 +45,7 @@ def git_push(PATH_OF_GIT_REPO,COMMIT_MESSAGE,files):
         print(e) 
 
 def download_pecha(pecha_id, out_path=None, branch="master"):
+    logger = setup_logger("error_repos","error_repos.log")
     pecha_url = f"{config['OP_ORG']}/{pecha_id}.git"
     out_path = Path(out_path)
     out_path.mkdir(exist_ok=True, parents=True)
@@ -49,7 +56,7 @@ def download_pecha(pecha_id, out_path=None, branch="master"):
     try:
         repo.git.checkout(branch_to_pull)
     except:
-        notifier(f"{pecha_id} has problem")
+        notifier(logger,f"{pecha_id} has problem")
     print(f"{pecha_id} Downloaded ")  
 
 def get_repo_names(headers):
