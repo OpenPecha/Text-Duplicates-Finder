@@ -1,4 +1,3 @@
-from difflib import get_close_matches
 from pathlib import Path
 from fuzzysearch import find_near_matches_in_file
 from os.path import exists
@@ -20,7 +19,7 @@ class OpfSearchSequence:
         len_of_text = len(text)
         mid = int(len_of_text/2)
         mid_seg = text[mid-25:mid+25]
-        self.diffs = (len_of_text-100,mid-75)
+        self.diffs = (len_of_text-50,mid-25)
         return (first_seg,mid_seg,last_seg)
 
     def get_target_files(self):
@@ -126,33 +125,25 @@ class OpfSearchSequence:
             matches.append((first_match,last_match))
         else:
             matches = self.get_shortest_match(first_match,mid_match,last_match)    
-
         return matches
 
     def get_shortest_match(self,first_match,mid_match,last_match):
         lengths =[len(first_match),len(mid_match),len(last_match)]
         minimum = min(lengths)
-        if lengths.count(minimum) == 1:
-            matches = self.get_one_minimum(minimum,first_match,mid_match,last_match)
-        elif lengths.count(minimum) == 2:
-            matches = self.get_two_minimum(minimum,first_match,mid_match,last_match)
-        else:
-            matches =self.get_three_minimum(minimum,first_match,mid_match,last_match)
-
+        actions = {1:self.get_one_minimum,2:self.get_two_minimum,3:self.get_three_minimum}
+        action = actions.get(minimum)
+        matches = action(minimum,first_match,mid_match,last_match)
         return matches        
 
     def get_closest_match(self,match_target,match_collection,diffs):
-        ref_span = match_target[0].start
+        ref_start = match_target[0].start
         diff_matches={}
         for match in match_collection:
-            diff = match.start - ref_span
+            diff = match.start - ref_start
             diff_matches.update({diff:match})
-
         closest_diff = min(list(diff_matches.keys()), key=lambda x:abs(x-diffs))     
-
         return diff_matches[closest_diff]   
             
-
     
     def get_one_minimum(self,minimum,first_match,mid_match,last_match):
         first_last_diff,mid_to_end_diff = self.diffs
@@ -169,7 +160,7 @@ class OpfSearchSequence:
 
 
     def get_two_minimum(self,minimum,first_match,mid_match,last_match):
-        first_last_diff,mid_to_end_diff = self.diffs
+        first_last_diff,_ = self.diffs
         matches = []
         if len(first_match) != minimum:
             for match in last_match:
@@ -187,13 +178,14 @@ class OpfSearchSequence:
 
     def get_three_minimum(self,minimum,first_match,mid_match,last_match):
         matches = []
-        for first,mid,last in zip(first_match,mid_match,last_match):
+        for first,_,last in zip(first_match,mid_match,last_match):
             matches.append((first,last))
         return matches
 
     def search_sequence(self):
         instances = {}
         segments = self.get_search_segments()
+        print(segments)
         for target_file in self.get_target_files():
             matches = self.fuzzy_search(target_file,segments)
             if matches:
