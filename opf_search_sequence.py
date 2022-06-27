@@ -14,12 +14,13 @@ class OpfSearchSequence:
 
     def get_search_segments(self):
         text = Path(self.search_sequence_path).read_text(encoding="utf-8")
-        first_seg = text[0:50]
-        last_seg = text[-50:]
-        len_of_text = len(text)
-        mid = int(len_of_text/2)
-        mid_seg = text[mid-25:mid+25]
-        self.diffs = (len_of_text-50,mid-25)
+        self.segment_length = 50
+        first_seg = text[0:self.segment_length]
+        last_seg = text[-self.segment_length:]
+        self.len_of_text = len(text)
+        mid = int(self.len_of_text/2)
+        mid_seg = text[int(mid-self.segment_length/2):int(mid+self.segment_length/2)]
+        self.diffs = (int(self.len_of_text-self.segment_length),int(mid-self.segment_length/2))
         return (first_seg,mid_seg,last_seg)
 
     def get_target_files(self):
@@ -29,18 +30,25 @@ class OpfSearchSequence:
 
     def fuzzy_search(self,target_file,segments): 
         first,mid,last = segments
-        first_match = self.check_matches(first,target_file)
-        mid_match = self.check_matches(mid,target_file)
-        last_match = self.check_matches(last,target_file)
+        first_matches = self.check_matches(first,target_file)
+        mid_matches = self.check_matches(mid,target_file)
+        last_matches = self.check_matches(last,target_file)
 
-        if first_match and mid_match and last_match:
-            matches = self.filter_matches(first_match,mid_match,last_match)
+        if first_matches and mid_matches and last_matches:
+            print(first_matches)
+            print("**************")
+            print(last_matches)
+            print("***********")
+            matches = self.filter_matches(first_matches,mid_matches,last_matches)
+            print(matches)
+            
             return matches
 
 
     def check_matches(self,search_pattern,target_file):
         with open(target_file.as_posix(), 'r',encoding='utf8') as f:
-            match = find_near_matches_in_file(search_pattern,f,max_l_dist=10)
+            match = find_near_matches_in_file(search_pattern,f,max_l_dist=15)
+
         return match
 
 
@@ -119,73 +127,107 @@ class OpfSearchSequence:
             instances.update(instance)
         return instances
 
-    def filter_matches(self,first_match,mid_match,last_match):
-        matches = []
-        if len(first_match) == len(mid_match) == len(last_match) == 1:
-            matches.append((first_match,last_match))
+    def normalize_matches(self,first_matches,mid_matches,last_matches):
+        matches = (first_matches,mid_matches,last_matches)
+        norm_matches = []
+        for match in matches:
+            norm_match = self.check_minimum(match)
+            norm_matches.append(norm_match)
+        return norm_matches
+
+    def check_minimum(self,matches):
+        min = matches[0].dist
+        min_match = []
+        for match in matches:
+            if match.dist <= min:
+                min = match.dist
+        for match in matches:
+            if match.dist == min:
+                min_match.append(match)
+        return min_match 
+
+            
+
+    def filter_matches(self,first_matches,mid_matches,last_matches):
+        x= 0
+        normalized_matches = self.normalize_matches(first_matches,mid_matches,last_matches)
+        first_matches,mid_matches,last_matches = normalized_matches
+
+        if len(first_matches) == len(mid_matches) == len(last_matches) == 1:
+            matches = [(first_matches[0],last_matches[0])]
         else:
-            matches = self.get_shortest_match(first_match,mid_match,last_match)    
+            matches = self.get_shortest_match(first_matches,mid_matches,last_matches)    
         return matches
 
-    def get_shortest_match(self,first_match,mid_match,last_match):
-        lengths =[len(first_match),len(mid_match),len(last_match)]
-        minimum = min(lengths)
-        actions = {1:self.get_one_minimum,2:self.get_two_minimum,3:self.get_three_minimum}
-        action = actions.get(minimum)
-        matches = action(minimum,first_match,mid_match,last_match)
+    def get_shortest_match(self,first_matches,mid_matches,last_matches):
+        lengths =[len(first_matches),len(mid_matches),len(last_matches)]
+        no_of_minimums = lengths.count(min(lengths))
+        actions = {1:self.one_minimum,2:self.two_minimum,3:self.three_minimum}
+        action = actions.get(no_of_minimums)
+        matches = action(no_of_minimums,first_matches,mid_matches,last_matches)
         return matches        
 
     def get_closest_match(self,match_target,match_collection,diffs):
-        ref_start = match_target[0].start
+        ref_start = match_target.start
         diff_matches={}
         for match in match_collection:
-            diff = match.start - ref_start
+            diff = abs(match.start - ref_start)
             diff_matches.update({diff:match})
         closest_diff = min(list(diff_matches.keys()), key=lambda x:abs(x-diffs))     
         return diff_matches[closest_diff]   
             
     
-    def get_one_minimum(self,minimum,first_match,mid_match,last_match):
+    def one_minimum(self,minimum,first_matches,mid_matches,last_matches):
         first_last_diff,mid_to_end_diff = self.diffs
-        if len(first_match) == minimum:
-            last_match = self.get_closest_match(first_match,last_match,first_last_diff)
-        elif len(mid_match) == minimum:
-            first_match = self.get_closest_match(mid_match,first_match,mid_to_end_diff)
-            last_match = self.get_closest_match(mid_match,last_match,mid_to_end_diff)
+        matches = []
+        if len(first_matches) == minimum:
+            for match in first_matches:
+                last_match = self.get_closest_match(match,last_matches,first_last_diff)
+                matches.append((match,last_match))
+        elif len(mid_matches) == minimum:
+            for match in mid_matches:
+                first_match = self.get_closest_match(match,first_matches,mid_to_end_diff)
+                last_match = self.get_closest_match(match,last_matches,mid_to_end_diff)
+                matches.append((first_match,last_match))
+
         else:
-            first_match = self.get_closest_match(last_match,first_match,first_last_diff)
+            for match in last_matches:
+                first_match = self.get_closest_match(match,first_matches,first_last_diff)
+                matches.append((first_match,match))
 
-        return [(first_match,last_match)]
+        return matches
 
 
 
-    def get_two_minimum(self,minimum,first_match,mid_match,last_match):
+    def two_minimum(self,minimum,first_matches,mid_matches,last_matches):
         first_last_diff,_ = self.diffs
         matches = []
-        if len(first_match) != minimum:
-            for match in last_match:
-                first_match = self.get_closest_match(match,first_match,first_last_diff)
+        if len(first_matches) != minimum:
+            for match in last_matches:
+                first_match = self.get_closest_match(match,first_matches,first_last_diff)
                 matches.append((first_match,match))
-        elif len(mid_match) != minimum:
-            for first,last in zip(first_match,last_match):
+        elif len(mid_matches) != minimum:
+            for first,last in zip(first_matches,last_matches):
                 matches.append((first,last))
-        elif len(last_match) != minimum:
-            for match in first_match:
-                last_match = self.get_closest_match(match,last_match,first_last_diff)
+        elif len(last_matches) != minimum:
+            for match in first_matches:
+                last_match = self.get_closest_match(match,last_matches,first_last_diff)
                 matches.append((match,last_match))        
 
         return matches
 
-    def get_three_minimum(self,minimum,first_match,mid_match,last_match):
+    def three_minimum(self,minimum,first_matches,mid_matches,last_matches):
         matches = []
-        for first,_,last in zip(first_match,mid_match,last_match):
+        for first,_,last in zip(first_matches,mid_matches,last_matches):
             matches.append((first,last))
         return matches
 
     def search_sequence(self):
         instances = {}
         segments = self.get_search_segments()
+        print(segments)
         for target_file in self.get_target_files():
+            print(target_file)
             matches = self.fuzzy_search(target_file,segments)
             if matches:
                 spans = self.get_matched_spans(matches)
