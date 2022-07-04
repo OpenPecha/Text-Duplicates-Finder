@@ -1,0 +1,22 @@
+id: 3526aef732464914bde0977a03da6aac
+title: chojuk
+language: bo
+instances:
+  ea22e2351f314cd0bf332aeec7d71dd8:
+    pecha_id: I5A3E81FD
+    span:
+      base: FE32B
+      start: 0
+      end: 109454
+  bb8b12fa1f2f4d6ab7cf21628deae5f3:
+    pecha_id: IA3E40644
+    span:
+      base: 48C6
+      start: 1373900
+      end: 1492083
+  d0abc188cc0a491ebc44c79082277e3a:
+    pecha_id: P000791
+    span:
+      base: v061
+      start: 1374958
+      end: 1493238

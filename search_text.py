@@ -29,7 +29,7 @@ def get_instances(search_path,target_opf_path,work):
     return instances
 
 def get_pecha_ids():
-    pecha_ids = (Path(f"./tengyurs.txt").read_text(encoding='utf-8')).splitlines()
+    pecha_ids = (Path(f"./repo_names.txt").read_text(encoding='utf-8')).splitlines()
     for pecha_id in pecha_ids:
         yield pecha_id
     """ if not exists("./processed_pechas.log"):
@@ -62,15 +62,15 @@ def get_instances_from_remote_opfs():
     pecha_ids = get_pecha_ids()
     for pecha_id in pecha_ids:
         print(pecha_id)
-        #download_pecha(pecha_id,"./opfs")
+        download_pecha(pecha_id,"./opfs")
         target_opf_path = f"./opfs/{pecha_id}"
         instances = get_instances(search_path,target_opf_path,work)
         if instances:
             works_yml = update_works(instances,work)
-            Path("./works.yml").write_text(works_yml)
+            Path("./works.yml").write_te
             print(f"Instnace Match at {pecha_id}")
             #push_changes(target_opf_path)
-        #delete_processed_files(target_opf_path)
+        delete_processed_files(target_opf_path)
         logger.info(pecha_id)
 
 if __name__ == "__main__":
