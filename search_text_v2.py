@@ -1,5 +1,6 @@
 from pathlib import Path
 from fuzzysearch import find_near_matches_in_file
+from seg_data import search_Seg
 
 
 def check_increased_window(matches,original_text,search_text):
@@ -37,15 +38,25 @@ def fuzzy_search(target_file,search_segment):
     return match
 
 def get_search_target(target_file:Path):
+    obj = search_Seg()
     text = target_file.read_text()
     text = text.replace("\n","")
     chunks, chunk_size = len(text), 50
     splitted_chunks = [ text[i:i+chunk_size] for i in range(0, chunks, chunk_size) ]
-    return splitted_chunks
+    for chunk in splitted_chunks:
+        obj.push(chunk)
+    return obj
 
 
 def main(search_file:Path,target_file:Path):
-    search_target = get_search_target(target_file)
-    check_instances(search_file,search_target)
 
-    
+    seg_obj = get_search_target(target_file)
+    print(seg_obj.getFirst())
+    print(seg_obj.getLast())
+
+    #check_instances(search_file,search_target)
+
+
+if __name__ == "__main__":
+    search_path = Path("O96FB467A/O96FB467A/O96FB467A.opf/base/03EC.txt")
+    main(search_path,search_path)
