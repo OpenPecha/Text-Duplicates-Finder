@@ -10,6 +10,7 @@ class Node:
 class search_Seg:
     def __init__(self):
         self.head = None
+        self.firstNode = self.head
 
     def push(self, data):
         new_node = Node(data)
@@ -27,20 +28,17 @@ class search_Seg:
 
         return len
 
-    def getMiddle(self, head):
+    def getMiddle(self):
+        head = self.firstNode
         if head != None:
-            # find length
             len = self.getLen(head)
             temp = head
- 
-            # traverse till we reached half of length
             midIdx = len // 2
             while midIdx != 0:
                 temp = temp.next
                 midIdx -= 1
  
-            # temp will be storing middle element
-            return temp
+            return temp.data
 
 
     def getLast(self):
