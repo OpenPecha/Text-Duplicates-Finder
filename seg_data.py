@@ -1,5 +1,3 @@
-from tempfile import TemporaryDirectory
-
 
 class Node:
     def __init__(self, data):
@@ -15,7 +13,8 @@ class search_Seg:
     def push(self, data):
         new_node = Node(data)
         if self.head is not None:
-            new_node.prev = self.head 
+            new_node.prev = self.head
+            self.head.next = new_node 
         self.head = new_node
 
 
@@ -28,8 +27,8 @@ class search_Seg:
 
         return len
 
-    def getMiddle(self):
-        head = self.firstNode
+    def getMiddle(self,start_node):
+        head = start_node
         if head != None:
             len = self.getLen(head)
             temp = head
@@ -38,7 +37,7 @@ class search_Seg:
                 temp = temp.next
                 midIdx -= 1
  
-            return temp.data
+            return temp
 
 
     def getLast(self):
@@ -46,11 +45,11 @@ class search_Seg:
             temp = self.head
             while temp.next != None:
                 temp = temp.next
-            return temp.data
+            return temp
 
     def getFirst(self):
         if self.head != None:
             temp = self.head
             while temp.prev!= None:
                 temp = temp.prev
-            return temp.data
+            return temp

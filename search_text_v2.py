@@ -28,7 +28,15 @@ def get_search_target(target_file:Path):
 
 def main(search_file:Path,target_file:Path):
     seg_obj = get_search_target(target_file)
-    check_instances(search_file,seg_obj)
+    first_head = seg_obj.getFirst()
+    middle = seg_obj.getMiddle(first_head)
+    last = seg_obj.getLast()
+    print(first_head.data)
+    print(first_head.next.data)
+    print(middle.data)
+    print(middle.next.data)
+    print(last.data)
+    #check_instances(search_file,seg_obj)
 
 
 def check_instances(search_file,seg_obj:search_Seg):
@@ -37,6 +45,7 @@ def check_instances(search_file,seg_obj:search_Seg):
     last_match = fuzzy_search(search_file,seg_obj.getLast())
     print(first_match)
     print(last_match)
+    
 if __name__ == "__main__":
     search_path = Path("O96FB467A/O96FB467A/O96FB467A.opf/base/03EC.txt")
     target_path = Path("opfs_tengyur/I5A3E81FD/I5A3E81FD.opf/base/FE32B.txt")
